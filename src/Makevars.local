@@ -1,0 +1,32 @@
+#DEBUG ?= 1
+#USE_GUNC ?= 1
+ARCH ?= 32
+SECNUM_VERSION ?= 2
+
+# 设置工程名称
+project ?= secnum
+
+# 如果USE_GNUC等于1则设定相应编译选项
+ifeq ($(USE_GNUC),1)
+
+# 调试编译
+ifeq ($(DEBUG),1)
+DEFS += -DSECNUM_DEBUG=1
+else
+DEFS += -DSECNUM=0 -DNODEBUG
+endif
+
+# 一些自定义的宏设定
+ifeq ($(SECNUM_VERSION),1)
+DEFS += -DSECNUM_VERSION=1
+else
+DEFS += -DSECNUM_VERSION=2
+endif
+
+# 其余错误编译选项
+CXXFLAGS_WERROR = -Werror
+CXXFLAGS += -Wcast-qual -Wcast-align
+CXXFLAGS += -Wall -Wpointer-arith -Wshadow -Wwrite-strings -W -Wno-unused-function
+CXXFLAGS += $(CXXFLAGS_WERROR)
+
+endif
