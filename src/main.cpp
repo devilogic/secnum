@@ -10,12 +10,15 @@
 
 int main(int argc UNUSED, char* argv[] UNUSED) {
 	SecNum x;
-	SecNum r;
-	x.set(0x124fff);
-	x.div(0x124, r);
+	SecNum y;
+	x.set(0x12345);
+	y.set(0x12345);
+	//SecNum z = x / 1;
+
+
    	// x.add(1);
 	// x.sub(0x12345);
-	printf("0x%4x, 0x%4x\n", x.get(), r.get());
+	printf("0x%4x\n", z.get());
 	return 0;
 } 
 

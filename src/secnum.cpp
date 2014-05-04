@@ -1,4 +1,5 @@
 #include "secnum.h"
+#include "except.h"
 
 #include <stdio.h>
 //#include <stdlib.h>
@@ -10,37 +11,38 @@
 
 SecNum gZero;
 
-SecNum::SecNum() :  _bytes_idx(0) {
-	zero();
+SecNum::SecNum() : _bytes_idx(0) {
+    zero();
 }
 
-SecNum::~SecNum() {}
+SecNum::~SecNum() {
+}
 
 int SecNum::get_max_bits() {
-	return MAX_BITS;
+    return MAX_BITS;
 }
 
 struct secint* SecNum::get_secint() {
-	return &_secnum;
+    return &_secnum;
 }
 
 void SecNum::zero() {
-	memset(&_secnum, 0, sizeof(struct secint));
+    memset(&_secnum, 0, sizeof (struct secint));
 }
 
 int SecNum::set(unsigned v) {
-	set_internal(v);
-	return 0;
+    set_internal(v);
+    return 0;
 }
 
 int SecNum::set(struct secint& v) {
-	memcpy(&_secnum, &v, sizeof(struct secint));
-	return 0;
+    memcpy(&_secnum, &v, sizeof (struct secint));
+    return 0;
 }
 
 int SecNum::set(SecNum& v) {
-	memcpy(&_secnum, v.get_secint(), sizeof(struct secint));
-	return 0;
+    memcpy(&_secnum, v.get_secint(), sizeof (struct secint));
+    return 0;
 }
 
 #define COUNT_VALID_BYTES(x, v)					\
@@ -50,137 +52,161 @@ int SecNum::set(SecNum& v) {
 	(x) += (v) & 0xFF000000 ? 1 : 0;
 
 void SecNum::set_internal(unsigned v) {
-	if (0 == v) {
-		zero();
+    if (0 == v) {
+        zero();
         return;
-	}
+    }
 
-	unsigned char* x = reinterpret_cast<unsigned char*>(&_secnum);
-	unsigned mask = 1, i = 0;
-	while (mask) {
-		*(x + i) = (v & mask) ? 1 : 0;
-		mask = mask << 1;
-		i++;
-	}
-	COUNT_VALID_BYTES(_bytes_idx, v);
+    unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
+    unsigned mask = 1, i = 0;
+    while (mask) {
+        *(x + i) = (v & mask) ? 1 : 0;
+        mask = mask << 1;
+        i++;
+    }
+    COUNT_VALID_BYTES(_bytes_idx, v);
 }
 
 unsigned SecNum::get() {
-	unsigned char* x = reinterpret_cast<unsigned char*>(&_secnum);
-	unsigned i = 0, v = 0;
+    unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
+    unsigned i = 0, v = 0;
 
-	while (i < 32) {
-		v |= *(x + i) << i;
-		i++;
-	}
+    while (i < 32) {
+        v |= *(x + i) << i;
+        i++;
+    }
 
-	return v;
+    return v;
 }
 
 unsigned SecNum::get_valid_bits() {
-	unsigned i = 31;
-	unsigned char* y = reinterpret_cast<unsigned char*>(&_secnum);
-	do {
-		if (y[i]) {
-			break;
-		}
-	} while (i--);
-	i++;
-	
-	return i;
+    unsigned i = 31;
+    unsigned char* y = reinterpret_cast<unsigned char*> (&_secnum);
+    do {
+        if (y[i]) {
+            break;
+        }
+    } while (i--);
+    i++;
+
+    return i;
 }
 
 unsigned SecNum::get_bytes_idx() {
-	return _bytes_idx;
+    return _bytes_idx;
 }
 
 int SecNum::is_neg() {
-	return _secnum.v31;
+    return _secnum.v31;
 }
 
-int SecNum::is_zero() {	
-	return !memcmp(&_secnum, gZero.get_secint(), sizeof(struct secint));
+int SecNum::is_zero() {
+    return !memcmp(&_secnum, gZero.get_secint(), sizeof (struct secint));
 }
 
 int SecNum::eq(SecNum& v) {
-	return !memcmp(&_secnum, v.get_secint(), sizeof(struct secint));
+    return !memcmp(&_secnum, v.get_secint(), sizeof (struct secint));
 }
 
 int SecNum::gt(SecNum& v) {
-	unsigned a = get_valid_bits();
-	unsigned b = v.get_valid_bits();
-	if (a > b)
-		return 1;
-	else if (a < b)
-		return 0;
-	else {
-		unsigned char* x = reinterpret_cast<unsigned char*>(&_secnum);
-		unsigned char* y = reinterpret_cast<unsigned char*>(v.get_secint());
+    unsigned a = get_valid_bits();
+    unsigned b = v.get_valid_bits();
+    if (a > b)
+        return 1;
+    else if (a < b)
+        return 0;
+    else {
+        unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
+        unsigned char* y = reinterpret_cast<unsigned char*> (v.get_secint());
 
-		for (int i = (int)(a-1); i >= 0; i--) {
-			if (x[i] > y[i]) {
-				return 1;
-			} else if (x[i] < y[i]) {
-				return 0;
-			}
-	    }/* end for */
-	}
+        for (int i = (int) (a - 1); i >= 0; i--) {
+            if (x[i] > y[i]) {
+                return 1;
+            } else if (x[i] < y[i]) {
+                return 0;
+            }
+        }/* end for */
+    }
 
-	return 0;
+    return 0;
 }
 
 int SecNum::lt(SecNum& v) {
-	return !gt(v);
+    unsigned a = get_valid_bits();
+    unsigned b = v.get_valid_bits();
+    if (a < b)
+        return 1;
+    else if (a > b)
+        return 0;
+    else {
+        unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
+        unsigned char* y = reinterpret_cast<unsigned char*> (v.get_secint());
+
+        for (int i = (int) (a - 1); i >= 0; i--) {
+            if (x[i] < y[i]) {
+                return 1;
+            } else if (x[i] > y[i]) {
+                return 0;
+            }
+        }/* end for */
+    }
+
+    return 0;
 }
 
 int SecNum::shl(unsigned v) {
-	unsigned i = 31;
-	unsigned char* x = reinterpret_cast<unsigned char*>(&_secnum);
+    unsigned i = 31;
+    unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
 
-	if (v > 31) v = 31;
+    if (v > 31) v = 31;
 
-	while (v--) {
-		i = 31;
-		do {
-			if (0 == i) {
-				x[0] = 0;
-			} else {
-				x[i] = x[i-1];
-			}
-		} while (i--);
-	}
+    while (v--) {
+        i = 31;
+        do {
+            if (0 == i) {
+                x[0] = 0;
+            } else {
+                x[i] = x[i - 1];
+            }
+        } while (i--);
+    }
 
-	return 0;
+    return 0;
 }
 
+SecNum SecNum::xshl(unsigned v) {
+	SecNum result;
+	result.set(*this);
+
+	result.shl(v);
+	return result;
+}
 
 int SecNum::shr(unsigned v) {
-	unsigned char* x = reinterpret_cast<unsigned char*>(&_secnum);
-	unsigned char y[32];
+    unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
+    unsigned char y[32];
 
-	for (int i = 0, j = 31; i < 32; i++, j--) {
-		y[j] = x[i];
-	}
+    for (int i = 0, j = 31; i < 32; i++, j--) {
+        y[j] = x[i];
+    }
 
-	memcpy(x, &y[0], 32);
-	shl(v);
+    memcpy(x, &y[0], 32);
+    shl(v);
 
-	for (int i = 0, j = 31; i < 32; i++, j--) {
-		y[j] = x[i];
-	}
-	memcpy(x, &y[0], 32);
+    for (int i = 0, j = 31; i < 32; i++, j--) {
+        y[j] = x[i];
+    }
+    memcpy(x, &y[0], 32);
 
-	return 0;
+    return 0;
 }
 
+SecNum SecNum::xshr(unsigned v) {
+	SecNum result;
+	result.set(*this);
 
-static inline
-unsigned add_internal(unsigned char x, unsigned char y, unsigned char* z) {
-	*z = (x & 0x01) + (y & 0x01);
-	unsigned plus = (*z & 0x02) >> 1;
-	*z &= 0x01;
-
-	return plus;
+	result.shr(v);
+	return result;
 }
 
 int SecNum::add(unsigned v) {
@@ -189,110 +215,198 @@ int SecNum::add(unsigned v) {
     return add(n);
 }
 
-int SecNum::add(SecNum& v) {
+SecNum SecNum::xadd(unsigned v) {
 	SecNum result;
-	unsigned char* x = reinterpret_cast<unsigned char*>(&_secnum);
-	unsigned char* y = reinterpret_cast<unsigned char*>(v.get_secint());
-	unsigned char* z = reinterpret_cast<unsigned char*>(result.get_secint());
+	result.set(*this);
 
-	unsigned i = 0;
+	result.add(v);
+	return result;
+}
+
+int SecNum::add(SecNum& v) {
+    SecNum result;
+    unsigned char* x = reinterpret_cast<unsigned char*> (&_secnum);
+    unsigned char* y = reinterpret_cast<unsigned char*> (v.get_secint());
+    unsigned char* z = reinterpret_cast<unsigned char*> (result.get_secint());
+
+    unsigned i = 0;
     unsigned char plus = 0, tmp = 0;
 
-	while (i < 32) {
-		*(z+i) = plus & 0x01;
-		plus = add_internal(*(x+i), *(y+i), &tmp);
-		plus |= add_internal(tmp, *(z+i), z+i);
-		i++;
-	}
+    while (i < 32) {
+        *(z + i) = plus & 0x01;
+        plus = add_internal(*(x + i), *(y + i), &tmp);
+        plus |= add_internal(tmp, *(z + i), z + i);
+        i++;
+    }
 
-	set(result);
+    set(result);
 
     return 0;
 }
 
+SecNum SecNum::xadd(SecNum& v) {
+	SecNum result;
+	result.set(*this);
+
+	result.add(v);
+	return result;
+}
+
 int SecNum::sub(unsigned v) {
-	SecNum n;
+    SecNum n;
     n.set(v);
     return sub(n);
 }
 
-static inline
-void anticode(unsigned char* v) {
-	unsigned i = 0;
-	while (i < 31) {
-		*(v+i) = ~(*(v+i));
-		i++;
-	}
+SecNum SecNum::xsub(unsigned v) {
+	SecNum result;
+	result.set(*this);
 
-	v[31] = 1;   /* 转换成负数 */
+	result.sub(v);
+	return result;
 }
 
 int SecNum::sub(SecNum& v) {
-	SecNum tmp;
-	tmp.set(v);
+    SecNum tmp;
+    tmp.set(v);
 
-	unsigned char* x = reinterpret_cast<unsigned char*>(tmp.get_secint());
-	anticode(x);  	/* 求v的反码 */
+    unsigned char* x = reinterpret_cast<unsigned char*> (tmp.get_secint());
+    anticode(x); /* 求v的反码 */
 
-	struct secint* y = reinterpret_cast<struct secint*>(x);
-	tmp.set(*y);
-	tmp.add(1);     /* 求v的补码 */
+    struct secint* y = reinterpret_cast<struct secint*> (x);
+    tmp.set(*y);
+    tmp.add(1); /* 求v的补码 */
 
-	return add(tmp);
+    return add(tmp);
+}
+
+SecNum SecNum::xsub(SecNum& v) {
+	SecNum result;
+	result.set(*this);
+
+	result.sub(v);
+	return result;
 }
 
 int SecNum::mul(unsigned v) {
-	SecNum n;
+    SecNum n;
     n.set(v);
     return mul(n);
 }
 
+SecNum SecNum::xmul(unsigned v) {
+	SecNum result;
+	result.set(*this);
+
+	result.mul(v);
+	return result;
+}
+
 int SecNum::mul(SecNum& v) {
-	if (v.is_zero()) {
-		zero();
-		return 0;
-	}
+    if (v.is_zero()) {
+        zero();
+        return 0;
+    }
 
-	unsigned char* y = reinterpret_cast<unsigned char*>(v.get_secint());	
-	unsigned i = get_valid_bits();
+    unsigned char* y = reinterpret_cast<unsigned char*> (v.get_secint());
+    unsigned i = get_valid_bits();
 
-	unsigned j = 0;
-	SecNum tmp, tmp2;
-	while (i--) {
-		if (y[j]) {
-			tmp.set(_secnum);
-			tmp.shl(j);
-			tmp2.add(tmp);
-		}
-		j++;
-	}
+    unsigned j = 0;
+    SecNum tmp, tmp2;
+    while (i--) {
+        if (y[j]) {
+            tmp.set(_secnum);
+            tmp.shl(j);
+            tmp2.add(tmp);
+        }
+        j++;
+    }
 
-	set(tmp2);
+    set(tmp2);
 
-	return 0;
+    return 0;
+}
+
+SecNum SecNum::xmul(SecNum& v) {
+	SecNum result;
+	result.set(*this);
+
+	result.mul(v);
+	return result;
 }
 
 int SecNum::div(unsigned v, SecNum& r) {
-	SecNum n;
+    SecNum n;
     n.set(v);
     return div(n, r);
 }
 
+SecNum SecNum::xdiv(unsigned v, SecNum& r) {
+	SecNum result;
+	result.set(*this);
+
+	result.div(v, r);
+	return result;
+}
+
 int SecNum::div(SecNum& v, SecNum& r) {
-	if (lt(v)) {
-		r.set(_secnum);
-		zero();
+	/* 除数为0 */
+	if (v.eq(gZero)) {
+		/* 这里应该引发异常 */
+		return 1;
+	}
+	
+	/* 等于 */
+	if (eq(v)) {
+		r.zero();
+		v.set(1);
 		return 0;
 	}
 
-	unsigned q = 1;
-	do {
-		sub(v);
-		q++;
-	} while (gt(v));
+	/* 被除数小于除数 */
+    if (lt(v)) {
+        r.set(_secnum);
+        zero();
+        return 0;
+    }
 
-	r.set(*this);      /* 余数 */
-	set(q);            /* 商 */
+    unsigned q = 0;
+    do {
+        sub(v);
+        q++;
+    } while (gt(v));
 
-	return 0;
+    r.set(*this); /* 余数 */
+    set(q); /* 商 */
+
+    return 0;
+}
+
+SecNum SecNum::xdiv(SecNum& v, SecNum& r) {
+	SecNum result;
+	result.set(*this);
+
+	result.div(v, r);
+	return result;
+}
+
+inline
+unsigned SecNum::add_internal(unsigned char x, unsigned char y, 
+							  unsigned char* z) {
+	*z = (x & 0x01) + (y & 0x01);
+	unsigned plus = (*z & 0x02) >> 1;
+	*z &= 0x01;
+	
+	return plus;
+}
+
+inline
+void SecNum::anticode(unsigned char* v) {
+	unsigned i = 0;
+	while (i < 31) {
+		*(v + i) = ~(*(v + i));
+		i++;
+	}
+
+	v[31] = 1; /* 转换成负数 */
 }

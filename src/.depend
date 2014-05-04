@@ -1,2 +1,0 @@
-main.o: main.cpp secnum.h
-secnum.o: secnum.cpp secnum.h
