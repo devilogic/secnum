@@ -11,9 +11,9 @@
 int main(int argc UNUSED, char* argv[] UNUSED) {
 	SecNum x;
 	SecNum y;
-	x.set(0x12345);
-	y.set(0x12345);
-	//SecNum z = x / 1;
+	x.set(0x32113);
+	y.set(0x12312);
+	SecNum z = x / y;
 
 
    	// x.add(1);

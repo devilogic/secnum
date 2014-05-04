@@ -371,10 +371,10 @@ int SecNum::div(SecNum& v, SecNum& r) {
     }
 
     unsigned q = 0;
-    do {
+    while (!lt(v)) {
         sub(v);
         q++;
-    } while (gt(v));
+    }
 
     r.set(*this); /* 余数 */
     set(q); /* 商 */

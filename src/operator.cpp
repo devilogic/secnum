@@ -5,22 +5,22 @@ SecNum SecNum::operator=(SecNum& v) {
 	return *this;
 }
 
-SecNum SecNum::operator=(unsigned& v) {
+SecNum SecNum::operator=(unsigned v) {
 	this->set(v);
 	return *this;
 }
 
-SecNum SecNum::operator<<(SecNum& v) {
-	return xshl(v);
-}
+// SecNum SecNum::operator<<(SecNum& v) {
+// 	return xshl(v);
+// }
 
 SecNum SecNum::operator<<(unsigned v) {
 	return xshl(v);
 }
 
-SecNum SecNum::operator>>(SecNum& v) {
-	return xshr(v);
-}
+// SecNum SecNum::operator>>(SecNum& v) {
+// 	return xshr(v);
+// }
 
 SecNum SecNum::operator>>(unsigned v) {
 	return xshl(v);
