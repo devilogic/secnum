@@ -1,6 +1,6 @@
 #include "secnum.h"
 
-SecNum SecNum::operator=(SecNum& v) {
+SecNum SecNum::operator=(SecNum v) {
 	memcpy(&this->_secnum, v.get_secint(), sizeof (struct secint));
 	return *this;
 }

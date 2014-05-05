@@ -309,18 +309,26 @@ int SecNum::mul(SecNum& v) {
     }
 
     unsigned char* y = reinterpret_cast<unsigned char*> (v.get_secint());
-    unsigned i = get_valid_bits();
+    unsigned i = v.get_valid_bits();
 
     unsigned j = 0;
     SecNum tmp, tmp2;
+	// printf("orig = %d:%d\n", get(), i);
+	// printf("v = %d:%d\n", v.get(), v.get_valid_bits());
+
     while (i--) {
         if (y[j]) {
+			//printf("1");
             tmp.set(_secnum);
             tmp.shl(j);
             tmp2.add(tmp);
         }
+		// else {
+		// 	printf("0");
+		// }
         j++;
     }
+	// printf("\n");
 
     set(tmp2);
 

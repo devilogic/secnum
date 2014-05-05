@@ -47,7 +47,7 @@ public:
     virtual ~SecNum();
     
 public:
-	SecNum operator=(SecNum& v);
+	SecNum operator=(SecNum v);
 	SecNum operator=(unsigned v);
 
 	//SecNum operator<<(SecNum& v);
